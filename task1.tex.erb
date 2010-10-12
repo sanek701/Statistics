@@ -488,22 +488,11 @@ $$
   параметр распределения $\lambda = <%= roundn(param[:lambda], 4) %>$.
 <% end %>
 
-
-\newpage
-
-<% 
-  def dist_to_text(dist)
-    return "равномерном" if dist.kind_of?(Statistic::Uniform)
-    return "нормальном" if dist.kind_of?(Statistic::Normal)
-    return "экспоненциальном" if dist.kind_of?(Statistic::Exponential)
-  end 
-%>
-
 \par
 {\em Вывод.} На основании построенных гистограмм относительных частот и анализа 
 равномерной, нормальной и экспоненциальной вероятностных бумаг можно выдвинуть 
-гипотезы о <%= dist_to_text(dist1) %> распределении выборки 1 с параметрами 
-<%= parameters[1] %>, и <%= dist_to_text(dist2) %> распределении выборки 2 
+гипотезы о <%= dist_name(dist1) %> распределении выборки 1 с параметрами 
+<%= parameters[1] %>, и <%= dist_name(dist2) %> распределении выборки 2 
 с параметрами <%= parameters[2] %>. 
 
 \endinput

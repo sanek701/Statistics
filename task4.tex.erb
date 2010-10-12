@@ -2,6 +2,7 @@
 
 <% global = YAML.load_file("data/global.yaml") %>
 <% data = YAML.load_file("data/#{global['variant']}.yaml") %>
+<% r_xy = File.new('data.tmp').gets.to_f %>
 
 <% require 'statistic' %>
 <% require 'latex_helper' %>
@@ -55,7 +56,6 @@ T_{\text{набл}} =
 r^*_{xy}\dfrac{\sqrt{n - 2\vphantom{{r^*_{xy}}^2}}}{\sqrt{1 - {r^*_{xy}}^2}}.
 $$
 
-<% r_xy = -0.515753 %>
 <% t = r_xy*Math.sqrt(23/(1-r_xy**2)) %>
 Выборочный коэффициент корреляции вычислен в задании 3: $r^*_{xy} = <%= r_xy %>$, 
 $n = 25$, откуда:
