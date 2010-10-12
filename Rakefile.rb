@@ -52,7 +52,7 @@ task :clean do
   rm Dir["*.pdf"]
   rm Dir["*.ps"]
   rm Dir["*.dvi"]
-   rm Dir["*.tmp"]
+  rm Dir["*.tmp"]
   rm Dir["images/*.eps"]
 
   all_files = Dir["*"]
