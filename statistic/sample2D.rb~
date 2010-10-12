@@ -1,0 +1,10 @@
+
+module Statistic
+  class Sample2D
+    attr_reader :data
+
+    def initialize(data)
+      @data = data.dup
+    end
+  end
+end

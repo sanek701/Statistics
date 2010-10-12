@@ -1,0 +1,49 @@
+<% require 'yaml' %>
+<% global = YAML.load_file("data/global.yaml") %>
+
+\thispagestyle{empty}
+
+\vspace*{-\headheight}\vspace*{-\headsep}
+
+{\centering
+{\sc
+федеральное агентство по образованию\\
+московский государственный индустриальный университет\\
+кафедра <<общей и прикладной математики>>\\
+}
+
+
+\vspace{7cm plus 1mm minus 1mm}
+
+
+{\large\bf
+Курсовая работа по дисциплине\\
+<<Теория вероятностей и математическая статистика>>
+}
+
+%\vspace{2cm plus 1mm minus 1mm}
+
+\vfill
+
+\begin{flushright}
+\begin{tabular}{l}
+Студент: <%= global['student'] %>
+\\
+Группа: <%= global['group'] %>
+\\
+Преподаватель: <%= global['teacher'] %>
+\\
+Вариант: <%= global['variant'] %>
+\end{tabular}
+\end{flushright}
+
+\vfill
+
+{\small\sc 
+МОСКВА <%= global['year'] %>
+}
+
+}
+
+\newpage
+\endinput

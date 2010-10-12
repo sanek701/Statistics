@@ -1,0 +1,2 @@
+---
+  - {file: "st", image_cnt: 12, dependences: [], erb: true}

@@ -1,0 +1,366 @@
+input graph;
+
+verbatimtex \input{preheader} 
+\begin{document}
+etex;
+
+<% require 'yaml' %>
+
+<% global = YAML.load_file("../data/global.yaml") %>
+<% data = YAML.load_file("../data/#{global['variant']}.yaml") %>
+
+<% require '../statistic' %>
+ 
+<%
+sample = {}
+for i in 1 .. 4
+  sample[i] = Statistic::Sample::new(data[i]['data'])
+  sample[i].hist_step = data[i]['histstep'] if data[i]['histstep']
+  sample[i].hist_start  = data[i]['histstart'] if data[i]['histstart']
+end
+%>
+
+def histbox(expr xval, yval, xside) = 
+  (xval, 0) -- (xval, yval) -- (xval+xside, yval) -- (xval+xside, 0)
+enddef; 
+
+
+beginfig (1) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[1]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := ((<%= fdata.first - xoffset %>, 0.0) -- 
+           <%= fdata.map do |p|
+                 "(#{p},#{i/fdata.size})--(#{p},#{(i+=1)/fdata.size})"
+	   end.join("--") %> 
+           -- (<%= fdata.last + xoffset %>, 1.0));
+    
+    gdraw r withpen nullpen;       
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (2) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[2]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := ((<%= fdata.first - xoffset %>, 0.0) -- 
+           <%= fdata.map do |p|
+                 "(#{p},#{i/fdata.size})--(#{p},#{(i+=1)/fdata.size})"
+               end.join("--") %> 
+           -- (<%= fdata.last + xoffset %>, 1.0));
+    
+    gdraw r withpen nullpen;       
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (3) ;
+  draw begingraph (12cm, 3.5cm);
+    <% xoffset = (sample[1].max - sample[1].min)*0.04 %>
+    path r[];
+    
+    <% i, x = 0, sample[1].hist_start %>
+    <% step = sample[1].hist_step %>
+    <% hist = sample[1].hist %>
+    
+    setrange((<%= x - 0.5*step %>, 0), 
+             (<%= x + (hist.size + 0.5)*step %>, <%= hist.values.max*1.05 %>));
+    
+    <% hist.sort.each do |xi, val| %>
+      r[<%= i %>] := histbox(<%= xi %>, 
+                             <%= val %>, 
+                             <%= step %>);
+      gfill r[<%= i %>] -- cycle withcolor 0.5white;
+      grid.bot("%g", <%= x %>) withcolor white;
+      <% x += step %>
+      <% i += 1 %> 
+    <% end %>
+    
+    grid.bot("%g", <%= x %>) withcolor white;
+    
+    autogrid(, grid.lft) withcolor 0.5white; 
+    grid.lft("%g", 0) withcolor black;
+    
+    for i := 0 upto <%= i-1 %> :
+      gdraw r[i];
+    endfor;
+          
+  endgraph;
+endfig;
+
+beginfig (4) ;
+  draw begingraph (12cm, 3.5cm);
+    <% xoffset = (sample[2].max - sample[2].min)*0.04 %>
+    path r[];
+    
+    <% i, x = 0, sample[2].hist_start %>
+    <% step = sample[2].hist_step %>
+    <% hist = sample[2].hist %>
+    
+    setrange((<%= x - 0.5*step %>, 0), 
+             (<%= x + (hist.size + 0.5)*step %>, <%= hist.values.max*1.05 %>));
+    
+    <% hist.sort.each do |xi, val| %>
+      r[<%= i %>] := histbox(<%= xi %>, 
+                             <%= val %>, 
+                             <%= step %>);
+      gfill r[<%= i %>] -- cycle withcolor 0.5white;
+      grid.bot("%g", <%= x %>) withcolor white;
+      <% x += step %>
+      <% i += 1 %>
+    <% end %>
+    
+    grid.bot("%g", <%= x %>) withcolor white;
+    
+    autogrid(, grid.lft) withcolor 0.5white; 
+    grid.lft("%g", 0) withcolor black;
+    
+    for i := 0 upto <%= i-1 %> :
+      gdraw r[i];
+    endfor;
+          
+  endgraph;
+endfig;
+
+beginfig (5) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[1]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% _normal = Statistic::Normal.new(sample[1]) %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := (<%= fdata.map do |p|
+                 "(#{p},#{_normal.paper_transform(i/fdata.size)}) -- 
+                  (#{p},#{_normal.paper_transform((i+=1)/fdata.size)})"
+               end.join("--") %>);
+    
+    gdraw r withpen nullpen;      
+    <% k, b = _normal.linear_approx  %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen nullpen;
+ 
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+    
+    <% k, b = _normal.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen pencircle;
+    
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (6) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[1]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% _exponential = Statistic::Exponential.new(sample[1]) %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := (<%= fdata.map do |p|
+                 "(#{p},#{_exponential.paper_transform(i/fdata.size)}) -- 
+                  (#{p},#{_exponential.paper_transform((i+=1)/fdata.size)})"
+               end.join("--") %>);
+    
+    gdraw r withpen nullpen;
+    <% k, b = _exponential.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen nullpen;
+           
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+     
+    <% k, b = _exponential.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen pencircle;
+    
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (7) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[1]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% _uniform = Statistic::Uniform.new(sample[1]) %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := ((<%= fdata.first - xoffset %>, 0.0) -- 
+           <%= fdata.map do |p|
+                 "(#{p},#{i/fdata.size})--(#{p},#{(i+=1)/fdata.size})"
+               end.join("--") %> 
+           -- (<%= fdata.last + xoffset %>, 1.0));
+    
+    gdraw r withpen nullpen;
+    <% k, b = _uniform.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen nullpen;
+    
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+    <% k, b = _uniform.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen pencircle;
+    
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (8) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[2]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% _normal = Statistic::Normal.new(sample[2]) %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := (<%= fdata.map do |p|
+                 "(#{p},#{_normal.paper_transform(i/fdata.size)}) -- 
+                  (#{p},#{_normal.paper_transform((i+=1)/fdata.size)})"
+               end.join("--") %>);
+    
+    gdraw r withpen nullpen;      
+    <% k, b = _normal.linear_approx  %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen nullpen;
+ 
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+    
+    <% k, b = _normal.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen pencircle;
+    
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (9) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[2]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% _exponential = Statistic::Exponential.new(sample[2]) %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := (<%= fdata.map do |p|
+                 "(#{p},#{_exponential.paper_transform(i/fdata.size)}) -- 
+                  (#{p},#{_exponential.paper_transform((i+=1)/fdata.size)})"
+               end.join("--") %>);
+    
+    gdraw r withpen nullpen;
+    <% k, b = _exponential.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen nullpen;
+           
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+     
+    <% k, b = _exponential.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen pencircle;
+    
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (10) ;
+  draw begingraph (12cm, 3.5cm);
+    <% fdata = data[2]['data'].dup.sort %>
+    <% xoffset = (fdata.last - fdata.first)*0.04 %>
+    <% _uniform = Statistic::Uniform.new(sample[2]) %>
+    <% i = 0.0 %> 
+    path r;
+    
+    r := ((<%= fdata.first - xoffset %>, 0.0) -- 
+           <%= fdata.map do |p|
+                 "(#{p},#{i/fdata.size})--(#{p},#{(i+=1)/fdata.size})"
+               end.join("--") %> 
+           -- (<%= fdata.last + xoffset %>, 1.0));
+    
+    gdraw r withpen nullpen;
+    <% k, b = _uniform.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen nullpen;
+    
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    gdraw r withpen pencircle;
+    <% k, b = _uniform.linear_approx %>
+    gdraw (<%= fdata.first %>, <%= k*fdata.first + b %>) -- 
+          (<%= fdata.last %>, <%= k*fdata.last + b %>) withpen pencircle;
+    
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (11);
+  draw begingraph (12cm, 4.5cm); 
+    <% (0...sample[1].size).each do |i| %>
+      glabel(btex \(\bullet\) etex,(<%= sample[1].data[i] %>,<%= sample[2].data[i] %>));   
+    <% end %>
+ 
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    
+    <% (0...sample[1].size).each do |i| %>
+      glabel(btex \(\bullet\) etex,(<%= sample[1].data[i] %>,<%= sample[2].data[i] %>));   
+    <% end %>
+    
+    frame.;
+  endgraph;
+endfig;
+
+beginfig (12);
+  draw begingraph (12cm, 4.5cm); 
+  
+<% 
+xy_mean = (0...sample[1].size).map do |i| 
+  sample[1].data[i] * sample[2].data[i] 
+end.reduce(:+)/sample[1].size 
+%>
+<% r_xy = (xy_mean - sample[1].mean * sample[2].mean)/(sample[1].S_star * sample[2].S_star) %>
+
+    <% k1 = r_xy*sample[2].S_star/sample[1].S_star %>
+    <% b1 = sample[2].mean - k1*sample[1].mean %> 
+
+    gdraw (<%= sample[1].min %>, <%= sample[1].min * k1 + b1 %>) -- 
+          (<%= sample[1].max %>, <%= sample[1].max * k1 + b1 %>) withpen nullpen;
+
+    <% k2 = r_xy*sample[1].S_star/sample[2].S_star %>
+    <% b2 = sample[1].mean - k2*sample[2].mean %>
+ 
+    gdraw (<%= sample[2].min * k2 + b2 %>, <%= sample[2].min %>) -- 
+          (<%= sample[2].max * k2 + b2 %>, <%= sample[2].max %>) withpen nullpen;
+ 
+    autogrid(grid.bot, grid.lft) withcolor 0.5white; 
+    
+    gdraw (<%= sample[1].min %>, <%= sample[1].min * k1 + b1 %>) -- 
+          (<%= sample[1].max %>, <%= sample[1].max * k1 + b1 %>) withpen pencircle;
+          
+    glabel.urt (btex \(y_x\) etex, <%= sample[1].min %>, <%= sample[1].min * k1 + b1 %>);
+          
+    gdraw (<%= sample[2].min * k2 + b2 %>, <%= sample[2].min %>) -- 
+          (<%= sample[2].max * k2 + b2 %>, <%= sample[2].max %>) withpen pencircle;
+          
+    glabel.llft (btex \(x_y\) etex, <%= sample[2].max * k2 + b2 %>, <%= sample[2].max %>);
+    
+    frame.;
+  endgraph;
+endfig;
+
+end.
+
+

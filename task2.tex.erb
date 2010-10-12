@@ -1,0 +1,417 @@
+<% require 'yaml' %>
+
+<% global = YAML.load_file("data/global.yaml") %>
+<% data = YAML.load_file("data/#{global['variant']}.yaml") %>
+
+<% require 'statistic' %>
+<% require 'latex_helper' %>
+<% include LatexHelper %>
+
+<%
+sample = {}
+for i in 1 .. 4
+  sample[i] = Statistic::Sample::new(data[i]['data'])
+  sample[i].hist_step = data[i]['histstep'] if data[i]['histstep']
+  sample[i].hist_start  = data[i]['histstart'] if data[i]['histstart']
+end
+%>
+
+\subsection*{\hspace*{\parindent}Задание 2} 
+Для каждой из выборок, приведенных в задании $1$, по критерию Пирсона с уровнем 
+значимости $ 0{,}1 $ проверить гипотезу о виде закона распределения, 
+наиболее подходящего по результатам задания $1$.
+
+\par
+{\em Решение.} 
+Пусть имеется случайная выборка объема $ n $. Требуется определить закон 
+распределения изучаемой слуайной величины $ \xi $, найти соответствующие 
+параметры и оценить согласие выборки с принятым законом распределения. 
+На основании предыдущей обработки статистического материала выдвигается 
+гипотеза $ H_0 $ о том, что случайная величина подчиняется определенному закону, 
+например нормальному или экспоненциальному. Чтобы принять или отвергнуть 
+эту гипотезу, рассматривается велчиина $ U $ --- степень расхождения 
+теоритического и статистического распределения. За $ U $ принимают сумму 
+квадратов (с некоторыми коэффициентами) отклонений теоритических 
+вероятностей $ P_i $ попадания случайной величины в $ i $-й интервал 
+от соответствующих относительных частот $ P_i^* $. Известно, что случайная 
+величина $ U $ при условии справедливости гипотезы $ H_0 $ имеет так 
+называемое $ \chi^2 $-распределение.
+
+Если значение $ U $ превышает критическое значение $ \chi^2_{\text{крит}} $ 
+(вероятность этого меньше заданного уровня значимости $ \alpha $), 
+то объяснение этого факта тем, что исследуемая случайная величина 
+на самом деле подчиняется другому закону распределения и, следовательно, 
+$ U $ имеет распределение, отличное от $ \chi^2 $, более правдоподобно, 
+чем предположение о сильном отклонении значений выборки от ожидаемых значений. 
+Поэтому в данном случае гипотеза $ H_0 $ отвергается. 
+% Таблица критических 
+% значений $ \chi^2_{\text{крит}} $, больше которых $ \chi^2 $-распределенная 
+% величина $ U $ оказывается с вероятностью меньше $ \alpha $, в зависимости 
+% от $ \alpha $ и так называемого числа степеней свободы $ k $, приводится 
+% в справочниках по математической статистистике.
+
+Схема расчетов с помощью критерия Пирсона следующая.
+
+\begin{enumerate}
+
+\item На основании выборки принимается гипотеза $ H_0 $ об определенном законе 
+рапсределения и при этом предположении вычисляются оценки параметров этого 
+распределения. Для нормального распределения это выборочное математическое 
+ожидание и дисперсия, которые вычисляются по формулам: 
+$$  
+	\bar{x} = \frac{1}{n} \sum_{i=1}^n x_i{,}
+$$
+$$  
+	S^2 = \frac{1}{n} \sum_{i=1}^n {x_i^2 - \bar{x}^2}{,}  
+$$
+а исправленная выборочная дисперсия по формуле: 
+$$
+S^{*2} = \frac{n}{n-1} S^2.
+$$
+Если рассматривается гипотеза об экспоненциальном распределении, 
+то единственный определяющий параметр $ \lambda $ оценивается по формуле: 
+$$
+\lambda = \frac{1}{\bar{x}}.
+$$
+В случае гипотезы о равномерном распределении параметры оцениваются по формулам: 
+$$
+a = x_{\text{min}},\text{ } b = x_{\text{max}}.
+$$
+
+\item Все множество наблюдений разбивается на $ s $ промежутков вида 
+$ (a_{j-1}; a_j] $ и подсчитываются эмпирические частоты --- количество 
+наблюдений $ m_j $, попавших в $ j $-й промежуток, равна $ P_j^* = \dfrac{m_j}{n} $. 
+Сумма всех относительных частот равна $1$.
+
+\item Определяются теоритические частоты $ m_j^{\prime} $ для каждого $ j $-ого 
+промежутка $ (a_{j-1}; a_j] $: 
+$ m_j^{\prime} = \left( F \left( a_j \right) - F \left( a_{j-1} \right) \right) \cdot n$, 
+где $ F(x) $ --- теоритическая функция распределения с параметрами, 
+найденными на шаге 1. Для нормального распределения  
+$ F(x, m, \sigma) = \Phi \left( \dfrac{x-\bar{x}}{\sqrt{S^{*2}}} \right)  + 0.5, $
+где $ \Phi(x) = \dfrac{1}{\sqrt{2 \pi}} \int\limits_0^x {e^{-\frac{x^2}{2}}} dx$ 
+--- функция Лапласа. Для экспоненциального распределения 
+$ F(x) = 1 - e^{-\lambda x} = 1 - e^{} $ при $ x \geq 0 $. 
+В этом случае проще использовать формулу
+$$
+m_j^{\prime} = \left( e^{\frac{a_{j-1}}{\bar{x}}} - e^{\frac{a_{j}}{\bar{x}}}\right) \cdot n
+$$
+Для равномерного распределения $ F(x) = \dfrac{x-a}{b-a} = 
+\dfrac{x - x_{min}}{x_{max} - x_{min}} $ при $ x_{min} < x \leqslant x_{max} $.
+
+\item Вычисляются значения критерия Пирсона 
+$\chi^2_{\text{набл}} = \sum\limits_{j=1}^s {\frac{(m_j - m_j^{\prime})^2}{m_j^{\prime}}}$.
+
+\item Определяеся число степеней свободы $ k = s - r - 1 $, где $ r $ --- число параметров, 
+определяющих закон распределения (для нормального и равномерного распределения 
+распределения $ r = 2 $, для экспоненциального $ r = 1 $), $ s $ --- число 
+промежутков.
+
+\item По заданному уровню значимости $ \alpha $ и числу степеней свободы $ k $ 
+отыскивается критическое значение $ \chi^2_{\text{крит}}(\alpha, k) $. 
+Если $ \chi^2_{\text{набл}}(\alpha, k) <  \chi^2_{\text{крит}}(\alpha, k) $, 
+то нет оснований отергать гипотезу $ H_0 $ о принятом законе распределения. 
+Если же $ \chi^2_{\text{набл}}(\alpha, k)~\geqslant~ \chi^2_{\text{крит}}(\alpha, k) $, 
+то гипотезу $ H_0 $ отвергают с уровнем значимости $ \alpha $.
+
+\end{enumerate}
+
+%% надо бы переписать на partials :)
+
+<% dist =  sample[1].distribution %>
+<% if dist.kind_of?(Statistic::Uniform) %>
+  <% min = sample[1].data.min %>
+  <% max = sample[1].data.max %>
+Для выборки 1 была выдвинута гипотеза $H_0$ о равномерном распределении.
+Для ее проверки необходимо найти $ x_{min} $ и $ x_{max} $. Соответственно
+имеем $x_{min} = <%= min %>$ и $x_{max} = <%= max %>$. 
+Cоставим таблицу эмпирических и теоритических частот, используя интервалы 
+из задания 1 (табл.~\ref{tab:5}).
+
+\begin{table}[h]
+  \caption{Выборка 1, эмпирические и теоретические частоты.}\label{tab:5}
+  \begin{center}
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Интервал & $ m_j $ & $ m_j^\prime $ \\
+      \hline 
+      <% step = sample[1].hist_step %>
+      <% size = sample[1].size %>
+      <% hist = sample[1].frequencies %>
+      <% hist.to_a.sort.each do |x, f| %> 
+        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= 
+        roundn((((x + step - min)/(max - min)) - ((x - min)/(max - min))) * size, 4) %>$\\
+        \hline
+      <% end %>
+    \end{tabular}
+  \end{center}
+\end{table}
+
+<% chi = hist.to_a.inject(0) do |sum, e|
+     mjt = (((e[0] + step - min)/(max - min)) - ((e[0] - min)/(max - min))) * size
+     d = e[1] * size - mjt
+     sum + d*d/mjt
+   end
+ %>
+<% chi = roundn(chi, 4) %>
+<% chi_critic = roundn(Statistic::Calc::inv_chi_square(0.9, hist.size - 3), 4) %>
+
+Находим $ \chi_{\text{набл}}^2 = <%= chi %> $. Уровень значимости $ \alpha = 0{,}1 $, 
+степень свободы $ s - r - 1 = <%= hist.size %> - 2 - 1 = <%= hist.size - 3 %> $, 
+отсюда получаем $ \chi_{\text{кр}}^2 = <%= chi_critic %> $. 
+  <% if chi >= chi_critic %>
+Следовательно, $ \chi_{\text{набл}}^2 \geqslant \chi_{\text{кр}}^2 $ и поэтому 
+гипотезу $ H_0 $ мы отвергаем с уровнем значимости $ \alpha = 0{,}1$.
+  <% else %>
+Следовательно, $ \chi_{\text{набл}}^2 < \chi_{\text{кр}}^2 $ и поэтому 
+нет оснований отвергнуть гипотезу $ H_0 $ с уровнем значимости $ \alpha = 0{,}1$.
+  <% end %>
+<% elsif dist.kind_of?(Statistic::Normal) %>
+  <% med = roundn(sample[1].mean, 4) %>
+  <% sigma = roundn(sample[1].S_star, 4) %>
+Проверим гипотезу $ H_0 $ о нормальном распределении выборки 1.
+Для ее проверки необходимо найти $ \bar{x} $ и $ S^* $. Соответственно
+имеем $\bar{x} = <%= med %>$ и $S^* = <%= sigma %>$. 
+Cоставим таблицу эмпирических и теоритических частот, используя интервалы 
+из задания 1 (табл.~\ref{tab:5}).
+
+\begin{table}[h]
+  \caption{Выборка 1, эмпирические и теоретические частоты.}\label{tab:5}
+  \begin{center}
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Интервал & $ m_j $ & $ m_j^\prime $ \\
+      \hline 
+      <% step = sample[1].hist_step %>
+      <% size = sample[1].size %>
+      <% hist = sample[1].frequencies %>
+      <% hist.to_a.sort.each do |x, f| %> 
+        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= 
+        roundn((Statistic::Calc::laplace_function((x + step - med)/sigma) - 
+        Statistic::Calc::laplace_function((x - med)/sigma)) * size, 4) %>$\\
+        \hline
+      <% end %>
+    \end{tabular}
+  \end{center}
+\end{table}
+
+<% chi = hist.to_a.inject(0) do |sum, e|
+     mjt = (Statistic::Calc::laplace_function((e[0] + step - med)/sigma) - Statistic::Calc::laplace_function((e[0] - med)/sigma)) * size
+     d = e[1] * size - mjt
+     sum + d*d/mjt
+   end
+ %>
+<% chi = roundn(chi, 4) %>
+<% chi_critic = roundn(Statistic::Calc::inv_chi_square(0.9, hist.size - 3), 4) %>
+
+Находим $ \chi_{\text{набл}}^2 = <%= chi %> $. Уровень значимости $ \alpha = 0{,}1 $, 
+степень свободы $ s - r - 1 = <%= hist.size %> - 3 - 1 = <%= hist.size - 3 %> $, 
+отсюда получаем $ \chi_{\text{кр}}^2 = <%= chi_critic %> $. 
+  <% if chi >= chi_critic %>
+Следовательно, $ \chi_{\text{набл}}^2 \geqslant \chi_{\text{кр}}^2 $ и поэтому 
+гипотезу $ H_0 $ мы отвергаем с уровнем значимости $ \alpha = 0{,}1$.
+  <% else %>
+Следовательно, $ \chi_{\text{набл}}^2 < \chi_{\text{кр}}^2 $ и поэтому 
+нет оснований отвергнуть гипотезу $ H_0 $ с уровнем значимости $ \alpha = 0{,}1$.
+  <% end %>
+<% else %>
+  <% med = roundn(sample[1].mean, 4) %>
+  <% lambda = roundn(1.0/med, 4) %>
+Для выборки 1 была выдвинута гипотеза $H_0$ о экспоненциальном распределении. 
+Для ее проверки необходимо найти $\bar{x}$ и $\lambda$. Соответственно
+имеем $\bar{x} = <%= med %>$ и $\lambda = \dfrac{1}{\bar{x}} = <%= lambda%>$. 
+Cоставим таблицу эмпирических и теоритических частот, используя интервалы 
+из задания 1 (табл.~\ref{tab:5}).
+
+\begin{table}[h]
+  \caption{Выборка 1, эмпирические и теоретические частоты.}\label{tab:5}
+  \begin{center}
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Интервал & $ m_j $ & $ m_j^\prime $ \\
+      \hline 
+      <% step = sample[1].hist_step %>
+      <% size = sample[1].size %>
+      <% hist = sample[1].frequencies %>
+      <% hist.to_a.sort.each do |x, f| %> 
+        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= roundn((Math.exp(-x*lambda) - Math.exp(-(x + step)*lambda)) * size, 4) %>$\\
+        \hline
+      <% end %>
+    \end{tabular}
+  \end{center}
+\end{table}
+
+<% chi = hist.to_a.inject(0) do |sum, e|
+     mjt = (Math.exp(-e[0]*lambda) - Math.exp(-(e[0] + step)*lambda)) * size
+     d = e[1] * size - mjt
+     sum + d*d/mjt
+   end
+ %>
+<% chi = roundn(chi, 4) %>
+<% chi_critic = roundn(Statistic::Calc::inv_chi_square(0.9, hist.size - 2), 4) %>
+
+Находим $ \chi_{\text{набл}}^2 = <%= chi %> $. Уровень значимости $ \alpha = 0{,}1 $, 
+степень свободы $ s - r - 1 = <%= hist.size %> - 1 - 1 = <%= hist.size - 2 %> $, 
+отсюда получаем $ \chi_{\text{кр}}^2 = <%= chi_critic %> $. 
+  <% if chi >= chi_critic %>
+Следовательно, $ \chi_{\text{набл}}^2 \geqslant \chi_{\text{кр}}^2 $ и поэтому 
+гипотезу $ H_0 $ мы отвергаем с уровнем значимости $ \alpha = 0{,}1$.
+  <% else %>
+Следовательно, $ \chi_{\text{набл}}^2 < \chi_{\text{кр}}^2 $ и поэтому 
+нет оснований отвергнуть гипотезу $ H_0 $ с уровнем значимости $ \alpha = 0{,}1$.
+  <% end %>
+<% end %>
+
+%% вторая выборка
+<% dist =  sample[2].distribution %>
+<% if dist.kind_of?(Statistic::Uniform) %>
+  <% min = sample[2].data.min %>
+  <% max = sample[2].data.max %>
+Для выборки 2 была выдвинута гипотеза $H_0$ о равномерном распределении.
+Для ее проверки необходимо найти $ x_{min} $ и $ x_{max} $. Соответственно
+имеем $x_{min} = <%= min %>$ и $x_{max} = <%= max %>$. 
+Cоставим таблицу эмпирических и теоритических частот, используя интервалы 
+из задания 1 (табл.~\ref{tab:6}).
+
+\begin{table}[h]
+  \caption{Выборка 2, эмпирические и теоретические частоты.}\label{tab:6}
+  \begin{center}
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Интервал & $ m_j $ & $ m_j^\prime $ \\
+      \hline 
+      <% step = sample[2].hist_step %>
+      <% size = sample[2].size %>
+      <% hist = sample[2].frequencies %>
+      <% hist.to_a.sort.each do |x, f| %> 
+        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= 
+        roundn((((x + step - min)/(max - min)) - ((x - min)/(max - min))) * size, 4) %>$\\
+        \hline
+      <% end %>
+    \end{tabular}
+  \end{center}
+\end{table}
+
+<% chi = hist.to_a.inject(0) do |sum, e|
+     mjt = (((e[0] + step - min)/(max - min)) - ((e[0] - min)/(max - min))) * size
+     d = e[1] * size - mjt
+     sum + d*d/mjt
+   end
+ %>
+<% chi = roundn(chi, 4) %>
+<% chi_critic = roundn(Statistic::Calc::inv_chi_square(0.9, hist.size - 3), 4) %>
+
+Находим $ \chi_{\text{набл}}^2 = <%= chi %> $. Уровень значимости $ \alpha = 0{,}1 $, 
+степень свободы $ s - r - 1 = <%= hist.size %> - 2 - 1 = <%= hist.size - 3 %> $, 
+отсюда получаем $ \chi_{\text{кр}}^2 = <%= chi_critic %> $. 
+  <% if chi >= chi_critic %>
+Следовательно, $ \chi_{\text{набл}}^2 \geqslant \chi_{\text{кр}}^2 $ и поэтому 
+гипотезу $ H_0 $ мы отвергаем с уровнем значимости $ \alpha = 0{,}1$.
+  <% else %>
+Следовательно, $ \chi_{\text{набл}}^2 < \chi_{\text{кр}}^2 $ и поэтому 
+нет оснований отвергнуть гипотезу $ H_0 $ с уровнем значимости $ \alpha = 0{,}1$.
+  <% end %>
+<% elsif dist.kind_of?(Statistic::Normal) %>
+  <% med = roundn(sample[2].mean, 4) %>
+  <% sigma = roundn(sample[2].S_star, 4) %>
+Проверим гипотезу $ H_0 $ о нормальном распределении выборки 2.
+Для ее проверки необходимо найти $ \bar{x} $ и $ S^* $. Соответственно
+имеем $\bar{x} = <%= med %>$ и $S^* = <%= sigma %>$. 
+Cоставим таблицу эмпирических и теоритических частот, используя интервалы 
+из задания 1 (табл.~\ref{tab:6}).
+
+\begin{table}[h]
+  \caption{Выборка 2, эмпирические и теоретические частоты.}\label{tab:6}
+  \begin{center}
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Интервал & $ m_j $ & $ m_j^\prime $ \\
+      \hline 
+      <% step = sample[2].hist_step %>
+      <% size = sample[2]..size %>
+      <% hist = sample[2].frequencies %>
+      <% hist.to_a.sort.each do |x, f| %> 
+        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= 
+        roundn((Statistic::Calc::laplace_function((x + step - med)/sigma) - 
+        Statistic::Calc::laplace_function((x - med)/sigma)) * size, 4) %>$\\
+        \hline
+      <% end %>
+    \end{tabular}
+  \end{center}
+\end{table}
+
+<% chi = hist.to_a.inject(0) do |sum, e|
+     mjt = (Statistic::Calc::laplace_function((e[0] + step - med)/sigma) - Statistic::Calc::laplace_function((e[0] - med)/sigma)) * size
+     d = e[1] * size - mjt
+     sum + d*d/mjt
+   end
+ %>
+<% chi = roundn(chi, 4) %>
+<% chi_critic = roundn(Statistic::Calc::inv_chi_square(0.9, hist.size - 3), 4) %>
+
+Находим $ \chi_{\text{набл}}^2 = <%= chi %> $. Уровень значимости $ \alpha = 0{,}1 $, 
+степень свободы $ s - r - 1 = <%= hist.size %> - 3 - 1 = <%= hist.size - 3 %> $, 
+отсюда получаем $ \chi_{\text{кр}}^2 = <%= chi_critic %> $. 
+  <% if chi >= chi_critic %>
+Следовательно, $ \chi_{\text{набл}}^2 \geqslant \chi_{\text{кр}}^2 $ и поэтому 
+гипотезу $ H_0 $ мы отвергаем с уровнем значимости $ \alpha = 0{,}1$.
+  <% else %>
+Следовательно, $ \chi_{\text{набл}}^2 < \chi_{\text{кр}}^2 $ и поэтому 
+нет оснований отвергнуть гипотезу $ H_0 $ с уровнем значимости $ \alpha = 0{,}1$.
+  <% end %>
+<% else %>
+  <% med = roundn(sample[2].mean, 4) %>
+  <% lambda = roundn(1.0/med, 4) %>
+Для выборки 2 была выдвинута гипотеза $H_0$ о экспоненциальном распределении. 
+Для ее проверки необходимо найти $\bar{x}$ и $\lambda$. Соответственно
+имеем $\bar{x} = <%= med %>$ и $\lambda = \dfrac{1}{\bar{x}} = <%= lambda%>$. 
+Cоставим таблицу эмпирических и теоритических частот, используя интервалы 
+из задания 1 (табл.~\ref{tab:6}).
+
+\begin{table}[h]
+  \caption{Выборка 1, эмпирические и теоретические частоты.}\label{tab:6}
+  \begin{center}
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Интервал & $ m_j $ & $ m_j^\prime $ \\
+      \hline 
+      <% step = sample[2].hist_step %>
+      <% size = sample[2].size %>
+      <% hist = sample[2].frequencies %>
+      <% hist.to_a.sort.each do |x, f| %> 
+        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= roundn((Math.exp(-x*lambda) - Math.exp(-(x + step)*lambda)) * size, 4) %>$\\
+        \hline
+      <% end %>
+    \end{tabular}
+  \end{center}
+\end{table}
+
+<% chi = hist.to_a.inject(0) do |sum, e|
+     mjt = (Math.exp(-e[0]*lambda) - Math.exp(-(e[0] + step)*lambda)) * size
+     d = e[1] * size - mjt
+     sum + d*d/mjt
+   end
+ %>
+<% chi = roundn(chi, 4) %>
+<% chi_critic = roundn(Statistic::Calc::inv_chi_square(0.9, hist.size - 2), 4) %>
+
+Находим $ \chi_{\text{набл}}^2 = <%= chi %> $. Уровень значимости $ \alpha = 0{,}1 $, 
+степень свободы $ s - r - 1 = <%= hist.size %> - 1 - 1 = <%= hist.size - 2 %> $, 
+отсюда получаем $ \chi_{\text{кр}}^2 = <%= chi_critic %> $. 
+  <% if chi >= chi_critic %>
+Следовательно, $ \chi_{\text{набл}}^2 \geqslant \chi_{\text{кр}}^2 $ и поэтому 
+гипотезу $ H_0 $ мы отвергаем с уровнем значимости $ \alpha = 0{,}1$.
+  <% else %>
+Следовательно, $ \chi_{\text{набл}}^2 < \chi_{\text{кр}}^2 $ и поэтому 
+нет оснований отвергнуть гипотезу $ H_0 $ с уровнем значимости $ \alpha = 0{,}1$.
+  <% end %>
+<% end %>
+
+\newpage
+\par
+{\em Вывод.} После проверки гипотез о виде распределения выборок 1 и 2, 
+выбранного в задании 1, по критерию Пирсона был сделал вывод о том, что 
+нет оснований отвергнуть как гипотезу о нормальном рапределении выборки 1, 
+так и гипотезу об экспоненциальном распределении выборки 2 
+с уровнем значимости $0{,}1$.
+
