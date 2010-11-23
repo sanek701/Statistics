@@ -1,7 +1,7 @@
 
 module LatexHelper
   def number_in_text(num)
-    "#{num < 0 ? 'минус' : ''} $#{num.abs.to_s}$"
+    #"#{(num < 0 ? 'минус' : '')} $#{num.abs.to_s}$"
   end 
 
   def roundn(num, n)

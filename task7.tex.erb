@@ -4,8 +4,8 @@
 <% global = YAML.load_file("data/global.yaml") %>
 <% data = YAML.load_file("data/#{global['variant']}.yaml") %>
 
-<% require 'statistic' %>
-<% require 'latex_helper' %>
+<% require './statistic.rb' %>
+<% require './latex_helper.rb' %>
 <% include LatexHelper %>
 
 <%
@@ -74,10 +74,10 @@ n = sample[3].size
 p, q = 0.5, 1 - 0.5
 m1 = sample[3].data.select { |x| x > 5 }.size
 m2 = sample[4].data.select { |x| x > 5 }.size
-m1n = m1.to_f/n
-m2n = m2.to_f/n
-u1 = (m1n - p)/Math::sqrt(p*q)*Math::sqrt(n)
-u2 = (m2n - p)/Math::sqrt(p*q)*Math::sqrt(n)
+m1n = roundn(m1.to_f/n, 6)
+m2n = roundn(m2.to_f/n, 6)
+u1 = roundn((m1n - p)/Math::sqrt(p*q)*Math::sqrt(n), 6)
+u2 = roundn((m2n - p)/Math::sqrt(p*q)*Math::sqrt(n), 6)
 z1 = roundn(Statistic::Calc::inv_laplace_function(0.95 - 0.5), 6)
 z2 = roundn(Statistic::Calc::inv_laplace_function(0.9 - 0.5), 6)
 %>
@@ -98,10 +98,10 @@ $$
 $i$ & $m_i$ & $\frac{m_i}{n}$ & $U_i$ & $H_1$: $U_{\text{крит}}$ & $H_2$, $H_3$: $U_{\text{крит}}$ 
 \\
 \hline
-$3$ & $<%= m1 %>$ & <%= m1n %> & <%= u1 %> & \multirow{2}{*}{<%= z1 %>} & \multirow{2}{*}{<%= z2 %>} 
+$3$ & $<%= roundn(m1 ,4) %>$ & <%= roundn(m1n, 4) %> & <%= roundn(u1, 4) %> & \multirow{2}{*}{<%= z1 %>} & \multirow{2}{*}{<%= z2 %>} 
 \\
 \cline{1-4}
-$4$ & $<%= m2 %>$ & <%= m2n %> & <%= u2 %> & &
+$4$ & $<%= roundn(m2, 4) %>$ & <%= roundn(m2n, 4) %> & <%= roundn(u2, 4) %> & &
 \\
 \hline
 \end{tabular}

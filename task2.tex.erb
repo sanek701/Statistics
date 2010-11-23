@@ -3,8 +3,8 @@
 <% global = YAML.load_file("data/global.yaml") %>
 <% data = YAML.load_file("data/#{global['variant']}.yaml") %>
 
-<% require 'statistic' %>
-<% require 'latex_helper' %>
+<% require './statistic.rb' %>
+<% require './latex_helper.rb' %>
 <% include LatexHelper %>
 
 <%
@@ -140,7 +140,7 @@ Cоставим таблицу эмпирических и теоритичес�
       <% size = sample[1].size %>
       <% hist = sample[1].frequencies %>
       <% hist.to_a.sort.each do |x, f| %> 
-        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= 
+        $[<%= roundn(x, 4) %>; <%= roundn(x+step, 4) %>)$ & $<%= roundn(f*size, 4) %>$ & $<%= 
         roundn((((x + step - min)/(max - min)) - ((x - min)/(max - min))) * size, 4) %>$\\
         \hline
       <% end %>
@@ -191,7 +191,7 @@ Cоставим таблицу эмпирических и теоритичес�
       <% size = sample[1].size %>
       <% hist = sample[1].frequencies %>
       <% hist.to_a.sort.each do |x, f| %> 
-        $[<%= x %>; <%= x + step %>)$ & $<%= f * size %>$ & $<%= 
+        $[<%= roundn(x, 4) %>; <%= roundn(x+step, 4) %>)$ & $<%= roundn(f*size, 4) %>$ & $<%= 
         roundn((Statistic::Calc::laplace_function((x + step - med)/sigma) - 
         Statistic::Calc::laplace_function((x - med)/sigma)) * size, 4) %>$\\
         \hline

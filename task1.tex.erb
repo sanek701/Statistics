@@ -3,8 +3,8 @@
 <% global = YAML.load_file("data/global.yaml") %>
 <% data = YAML.load_file("data/#{global['variant']}.yaml") %>
 
-<% require 'statistic' %>
-<% require 'latex_helper' %>
+<% require './statistic.rb' %>
+<% require './latex_helper.rb' %>
 <% include LatexHelper %>
 
 <%
@@ -157,7 +157,7 @@ $h_j = \dfrac{m_j}{n(a_j-a_{j-1})}$. Полученная фигура, сост
       Интервал & Отн. частота \\
       \hline 
       <% sample[1].hist.to_a.sort.each do |x, f| %>
-        $[<%= x %>; <%= x + sample[1].hist_step %>)$ & $<%= f %>$ \\
+        $[<%= roundn(x, 4) %>; <%= roundn(x+sample[1].hist_step, 4) %>)$ & $<%= roundn(f, 4) %>$ \\
         \hline
       <% end %>
     \end{tabular}
@@ -171,7 +171,7 @@ $h_j = \dfrac{m_j}{n(a_j-a_{j-1})}$. Полученная фигура, сост
         Интервал & Отн. частота \\
         \hline 
         <% sample[2].hist.to_a.sort.each do |x, f| %>
-          $[<%= x %>; <%= x + sample[2].hist_step %>)$ & $<%= f %>$ \\
+          $[<%= roundn(x, 4) %>; <%= roundn(x+sample[2].hist_step, 4) %>)$ & $<%= roundn(f, 4) %>$ \\
           \hline
         <% end %>
       \end{tabular}

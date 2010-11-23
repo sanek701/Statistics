@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 require 'yaml'
-require 'preprocess'
+require './preprocess.rb'
 
 
 # yaml-файл с описанием mp-файлов картинок
@@ -103,8 +103,12 @@ MPTASKS.each do |mptask|
   task mptask['file'] => depend 
 end
 
+task :gnuplot do
+  require './task10.rb'
+  sh "gnuplot *.gnu"
+end
 
-task :all => MPTASKS.map{ |mptask| mptask['file'] }
+task :all => [:gnuplot] + MPTASKS.map{ |mptask| mptask['file'] }
 
 task :veryclean => :clean do
   files = []

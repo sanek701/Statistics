@@ -4,8 +4,8 @@
 <% global = YAML.load_file("data/global.yaml") %>
 <% data = YAML.load_file("data/#{global['variant']}.yaml") %>
 
-<% require 'statistic' %>
-<% require 'latex_helper' %>
+<% require './statistic.rb' %>
+<% require './latex_helper.rb' %>
 <% include LatexHelper %>
 
 <%

@@ -1,6 +1,6 @@
 
 require 'yaml'
-require 'preprocess'
+require './preprocess.rb'
 
 TEXT_EDITOR = 'scite'
 MAIN = 'main.tex'
@@ -54,6 +54,8 @@ task :clean do
   rm Dir["*.dvi"]
   rm Dir["*.tmp"]
   rm Dir["images/*.eps"]
+  rm Dir["images/*.dat"]
+  rm Dir["images/*.gnu"]
 
   all_files = Dir["*"]
   all_files.each do |file|
