@@ -56,10 +56,9 @@ def data_cor(data, file_name1, file_name2)
   g.close
   
   
-  max = a.max
   f = File.new(file_name2+".dat", "w")
   for l in 0...data.size
-    f.puts "#{l} #{a[l]/max}"
+    f.puts "#{l} #{a[l]/a[0].to_f}"
   end
   f.close
   
